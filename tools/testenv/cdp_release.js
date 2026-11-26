@@ -4,11 +4,12 @@ const crypto = require("crypto");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const PORT = process.env.CDP_PORT || "9333";
-const SOURCE = "D:/Autowork/项目/家族/config/4399_2026-11-19.xlsx";
+const SOURCE = process.env.SHEET_EDITOR_SOURCE_TEST || "";
 const SOURCE_NATIVE = SOURCE.replace(/\//g, "\\");
 const FIXTURE = path.join(ROOT, "tools", "testenv", "tmpfiles", "长表格.xlsx").replace(/\\/g, "/");
 const OUT_DIR = path.join(ROOT, "tools", "testenv", "tmpfiles");
 const SHOT_DIR = path.join(__dirname, "shots");
+if (!SOURCE) throw new Error("请设置 SHEET_EDITOR_SOURCE_TEST，指定用于模板回归的 xlsx 样本");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const results = [];
 
@@ -376,7 +377,7 @@ function sha256(file) {
 
   await evaluate(`(() => {
     const dev = window.__sheetDev;
-    const attachment = dev.state.files.find(x => x.name === "4399_2026-11-19.xlsx");
+    const attachment = dev.state.files.find(x => x.name === ${JSON.stringify(path.basename(SOURCE))});
     dev.activate(attachment.id);
     document.getElementById("btn-template").click();
     return true;
