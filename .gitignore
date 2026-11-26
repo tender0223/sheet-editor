@@ -1,0 +1,40 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 本地构建与旧版本
+build/
+build-*/
+release/
+release-*/
+release-*/
+_backup/
+tools/win7build/
+
+# 成品通过 GitHub Release 分发
+dist/*
+!dist/READMD.txt
+*.exe
+
+# 测试依赖、临时文件与数据
+tools/testenv/node_modules/
+tools/testenv/*/
+tools/testenv/diag_tmp*.js
+*.log
+
+# 数据、配置和敏感文件
+*.xlsx
+*.xls
+*.csv
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+.env
+.env.*
+*.pem
+*.key
+
+# 同目录下其他项目
+音色标注*
+打开音色标注.bat

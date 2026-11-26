@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>表格编辑器</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="appbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3.5" y="4.5" width="17" height="15" rx="2.5"></rect>
+          <path d="M3.5 9.5h17M9.5 9.5v10"></path>
+        </svg>
+      </span>
+      <span class="brand-name">表格编辑器</span>
+    </div>
+    <div class="app-actions">
+      <button class="btn primary" id="btn-open">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"></path></svg>
+        打开文件
+      </button>
+      <button class="btn" id="btn-open-folder">打开文件夹</button>
+      <button class="btn" id="btn-new">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v14M5 12h14"></path></svg>
+        新建表格
+      </button>
+      <button class="btn" id="btn-template" title="设置启动时默认打开的模板文件">默认模板</button>
+      <span class="grow"></span>
+      <button class="btn" id="btn-history" title="查看最近打开的文件">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3.2 2"></path></svg>
+        最近打开
+      </button>
+      <button class="btn" id="btn-save-all" disabled>全部保存</button>
+      <button class="icon-btn" id="btn-theme" title="外观与主题" aria-label="外观与主题">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"></path></svg>
+      </button>
+      <button class="icon-btn" id="btn-help" title="快捷键与说明" aria-label="帮助">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"></circle><path d="M9.8 9.3a2.3 2.3 0 1 1 3.4 2.1c-.8.5-1.2 1-1.2 1.9"></path><path d="M12 16.6v.1"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <nav class="tabbar" id="tabbar" hidden></nav>
+
+  <div class="toolbar" id="toolbar" hidden>
+    <button class="btn ghost" id="btn-save" title="保存（Ctrl+S）">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4.5h10l4 4V19a.5.5 0 0 1-.5.5h-13A.5.5 0 0 1 5 19z"></path><path d="M8 4.5v5h7M8 13h8v6.5H8z"></path></svg>
+      保存
+    </button>
+    <button class="btn ghost" id="btn-save-as">另存为</button>
+    <div class="menu-wrap" id="export-wrap">
+      <button class="btn ghost" id="btn-export" aria-haspopup="true">
+        导出
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 10 4 4 4-4"></path></svg>
+      </button>
+      <div class="menu" id="export-menu" hidden>
+        <button data-export="xlsx">标准 Excel 表格</button>
+        <button data-export="html">网页表格（计算结果）</button>
+      </div>
+    </div>
+    <span class="divider"></span>
+    <button class="btn ghost" id="btn-undo" title="撤销（Ctrl+Z）" disabled>
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8.5 8.5H15a4.5 4.5 0 0 1 0 9h-3"></path><path d="M11 5.5 7.5 9l3.5 3.5"></path></svg>
+      撤销
+    </button>
+    <button class="btn ghost" id="btn-redo" title="重做（Ctrl+Y）" disabled>
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M15.5 8.5H9a4.5 4.5 0 0 0 0 9h3"></path><path d="M13 5.5 16.5 9 13 12.5"></path></svg>
+      重做
+    </button>
+    <span class="divider"></span>
+    <button class="btn ghost" id="btn-insert-row" title="在选中行下方插入空白行">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4.5" y="4.5" width="15" height="6" rx="1.5"></rect><path d="M12 14v6M9 17h6"></path></svg>
+      插入行
+    </button>
+    <button class="btn ghost" id="btn-fill-formula" title="将公式批量填充到整列或选中行">公式填充</button>
+    <span class="divider"></span>
+    <div class="menu-wrap" id="freeze-wrap">
+      <button class="btn ghost" id="btn-freeze" title="滚动时固定表头、首行或首列" aria-pressed="false">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4.5" y="5.5" width="15" height="13" rx="1.5"></rect><path d="M4.5 9.5h15"></path><rect x="4.5" y="5.5" width="15" height="4" fill="currentColor" stroke="none"></rect></svg>
+        <span id="freeze-label">冻结窗格</span>
+      </button>
+      <div class="menu" id="freeze-menu" hidden>
+        <button data-freeze="row">冻结首行</button>
+        <button data-freeze="col">冻结首列</button>
+        <button data-freeze="both">冻结首行和首列</button>
+        <button data-freeze="none">取消冻结</button>
+      </div>
+    </div>
+    <button class="btn ghost" id="btn-clear-filter" title="取消所有列的筛选" hidden>
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16l-6.2 7.2V19l-3.6-1.9v-3.9z"></path><path d="m15.5 15.5 4 4M19.5 15.5l-4 4"></path></svg>
+      清除筛选
+    </button>
+    <span class="grow"></span>
+    <div class="search" id="search-box">
+      <svg class="ico search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+      <input id="search-input" type="text" placeholder="查找内容，自动高亮" autocomplete="off" spellcheck="false">
+      <span class="search-count" id="search-count">0 / 0</span>
+      <button class="mini-btn" id="btn-prev" title="上一处（Shift+Enter）" aria-label="上一处">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 14 6-6 6 6"></path></svg>
+      </button>
+      <button class="mini-btn" id="btn-next" title="下一处（Enter）" aria-label="下一处">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 10 6 6 6-6"></path></svg>
+      </button>
+    </div>
+    <select class="select" id="search-scope" title="查找范围"></select>
+    <label class="check"><input type="checkbox" id="search-filter">仅显示匹配行</label>
+  </div>
+
+  <div class="batchbar" id="batchbar" hidden>
+    <span class="batch-info">已选 <b id="sel-count">0</b> 行</span>
+    <button class="btn small" id="btn-batch-edit">批量修改</button>
+    <button class="btn small danger" id="btn-delete-rows">删除选中</button>
+    <button class="btn small" id="btn-copy">复制</button>
+    <button class="btn small ghost" id="btn-clear-sel">取消选择</button>
+    <span class="grow"></span>
+    <div class="menu-wrap">
+      <button class="btn small ghost" id="btn-more" aria-haspopup="true">
+        更多操作
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 10 4 4 4-4"></path></svg>
+      </button>
+      <div class="menu" id="more-menu" hidden>
+        <button data-action="dedupe">删除重复行</button>
+        <button data-action="empty">删除空行</button>
+        <button data-action="renumber">按当前顺序重新编号</button>
+        <button data-action="clear">清空所选行内容</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="formula-bar" id="formula-bar" hidden>
+    <input class="name-box" id="name-box" spellcheck="false" autocomplete="off" title="名称框：输入引用（如 B3）后回车可跳转">
+    <span class="fx-label" aria-hidden="true">fx</span>
+    <input class="formula-input" id="formula-input" placeholder="在此输入内容或 = 开头的公式" spellcheck="false" autocomplete="off">
+  </div>
+
+  <main class="workspace" id="workspace">
+    <div class="empty" id="empty">
+      <div class="empty-art">
+        <svg viewBox="0 0 140 104" fill="none">
+          <rect class="ea-bg" x="18" y="12" width="104" height="80" rx="10"/>
+          <rect class="ea-card" x="30" y="22" width="80" height="60" rx="5" stroke-width="1.5"/>
+          <path class="ea-card" d="M30 38h80" stroke-width="1.5"/>
+          <path class="ea-line" d="M48 22v60M67 22v60M86 22v60" stroke-width="1.2"/>
+          <path class="ea-line" d="M30 56h80M30 70h80" stroke-width="1.2"/>
+          <rect class="ea-head" x="30" y="22" width="80" height="16" rx="5"/>
+          <circle class="ea-plus" cx="112" cy="80" r="16"/>
+          <path d="M112 73v14M105 80h14" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1>还没有打开的文件</h1>
+      <p>支持 .xlsx、.html 表格文件，可在同一个窗口中打开多个文件；支持公式、快速计算、筛选与冻结窗格</p>
+      <div class="empty-actions">
+        <button class="btn primary" id="btn-open-empty">打开文件</button>
+        <button class="btn" id="btn-new-empty">新建表格</button>
+      </div>
+      <div class="recent-home" id="recent-home" hidden>
+        <div class="recent-title"><span>最近打开</span><button type="button" class="recent-clear" id="recent-clear">清空</button></div>
+        <div class="recent-list" id="recent-home-list"></div>
+      </div>
+    </div>
+    <div class="grid-wrap" id="grid-wrap" tabindex="0" hidden>
+      <table class="grid" id="grid">
+        <colgroup id="colgroup"></colgroup>
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="statusbar" id="statusbar">
+    <span class="status-path" id="status-path" title="点击复制文件路径"></span>
+    <span class="status-meta" id="status-meta"></span>
+    <span class="grow"></span>
+    <span class="status-extra" id="status-extra"></span>
+  </footer>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root" class="toast-root"></div>
+<div class="loading" id="loading" hidden>
+  <span class="spinner"></span>
+  <span id="loading-text">正在读取文件…</span>
+</div>
+
+<script src="formula.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
